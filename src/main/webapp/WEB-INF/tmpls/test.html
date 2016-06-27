@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+	<link rel="stylesheet" href="../css/bootstrap.min.css">
+	<link rel="stylesheet" href="../css/bootstrap-datetimepicker.min.css">
+	<script type="text/javascript" src="../js/jquery.min.js"></script>
+	<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../js/bootstrap-datetimepicker.min.js"></script>
+<script>
+
+	$(document).ready(function() {
+		initTimeInput();
+	});
+
+	function initTimeInput(){
+
+		$("#timestartttt").datetimepicker({
+			format: "yyyy-mm",
+			startView: 3,
+			minView: 3,
+			autoclose:true,
+			pickerPosition: "bottom-left"
+		});
+		var month = new Date().getMonth()+1;
+		var time = month<10?"0"+month:month;
+		$("#timestartttt").val(new Date().getFullYear()+"-"+time);
+	}
+
+</script>
+</head>
+<body>
+
+<input class="input-sm form-control" data-toggle="tooltip" title="点击选取日期"  id="timestartttt"  readonly type="text">
+
+
+</body>
+</html>

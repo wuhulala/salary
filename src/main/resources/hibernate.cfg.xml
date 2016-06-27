@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+        <session-factory>
+                <!--设置MYSQL的隔离级别
+                 READ UNCOMMITED 1
+                 READ COMMITED 2
+                 REPEATABLE READ 4
+                 SERIALIZEABLE 8
+                -->
+
+
+                <!-- 配置 hibernate 的基本信息 -->
+                <!-- hibernate 所使用的数据库方言 -->
+                <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
+
+                <!-- 执行操作时是否在控制台打印 SQL -->
+                <property name="show_sql">true</property>
+
+                <!-- 是否对 SQL 进行格式化 -->
+                <property name="format_sql">true</property>
+
+                <!-- 指定自动生成数据表的策略
+                create: 每一次都创建数据表但是会覆盖
+                create-drop  每一次创建之后  但是当sessionFactory关闭的时候回删除此表
+                update（较常用）：如果 数据库不存在此表  将会创建  如果已有数据表和当前创建不一样  会抛出异常  并添加不一样的列
+                validate： 比较当前表与数据库中的表  如果不一样 抛出异常
+                -->
+                <property name="hibernate.hbm2ddl.auto">update</property>
+
+                <property name="hibernate.temp.use_jdbc_metadata_defaults">false</property>
+
+
+        </session-factory>
+
+</hibernate-configuration>

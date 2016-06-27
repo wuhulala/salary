@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+    <task:annotation-driven/>
+    <context:component-scan base-package="com.databasecourse.salary"/>
+
+    <mvc:resources mapping="/js/**" location="/WEB-INF/js/"/>
+    <mvc:resources mapping="/css/**" location="/WEB-INF/css/"/>
+    <mvc:resources mapping="/images/**" location="/WEB-INF/images/"/>
+    <mvc:resources mapping="/resources/**" location="/WEB-INF/resources/"/>
+    <mvc:resources mapping="/fonts/**" location="/WEB-INF/fonts/"/>
+    <mvc:resources mapping="/tmpls/**" location="/WEB-INF/tmpls/"/>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/*"/>
+            <bean class="com.databasecourse.salary.interceptor.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <!-- SpringMVC上传文件时，需要配置MultipartResolver处理器 -->
+    <bean id="multipartResolver" class="com.databasecourse.salary.listener.MultipartListenerResolver">
+        <property name="defaultEncoding" value="utf-8" />
+        <property name="maxUploadSize" value="1536000" />
+        <property name="maxInMemorySize" value="40960" />
+    </bean>
+
+    <mvc:annotation-driven >
+        <!--配置fastjson-->
+        <mvc:message-converters register-defaults="true">
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes" value="application/json"/>
+                <property name="features">
+                    <array value-type="com.alibaba.fastjson.serializer.SerializerFeature">
+                        <value>DisableCircularReferenceDetect</value>
+                    </array>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <context:property-placeholder location="classpath:/*.properties"/>
+
+    <!-- 配置 C3P0 数据源 -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="user" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="driverClass" value="${jdbc.driverClass}"/>
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"/>
+    </bean>
+    <!-- 配置 SessionFactory -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:/hibernate.cfg.xml"/>
+        <property name="packagesToScan" value="com.databasecourse.salary.entities"/>
+    </bean>
+
+    <!--    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+               <property name="formatters">
+                      <set>
+                             <bean class="com.databasecourse.salary.converters.DateFormatter">
+                                    <constructor-arg type="java.lang.String" value="yyyy=MM-dd"/>
+                             </bean>
+                      </set>
+               </property>
+        </bean>-->
+
+    <!-- 配置 Spring 的声明式事务 -->
+    <!-- 1. 配置 hibernate 的事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+
+    <!-- 2. 配置事务属性 -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+
+        <tx:attributes>
+            <tx:method name="get*" read-only="true"/>
+            <tx:method name="find*" read-only="true"/>
+            <tx:method name="save*" />
+            <tx:method name="update*"/>
+            <tx:method name="remove*" />
+            <tx:method name="delete*"/>
+            <tx:method name="*" />
+        </tx:attributes>
+
+    </tx:advice>
+
+    <!-- 3. 配置事务切入点, 再把事务属性和事务切入点关联起来 -->
+    <aop:config>
+        <aop:pointcut expression="execution(* com.databasecourse.salary.services.*.*(..))" id="txPointcut"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPointcut"/>
+    </aop:config>
+
+
+</beans>
